@@ -1,10 +1,18 @@
+require 'yaml'
 module Gitlab
   class Auth
     def find_for_ldap_auth(auth, signed_in_resource = nil)
       uid = auth.info.uid
       provider = auth.provider
       email = auth.info.email.downcase unless auth.info.email.nil?
-      raise OmniAuth::Error, "LDAP accounts must provide an uid and email address" if uid.nil? or email.nil?
+	  
+	  #fix if no email in ldap
+	  if email.nil?
+		  config = YAML.load_file("/home/gitlab/gitlab/config/gitlab.yml")
+		  email = uid.nickname + "@" + config["ldap"]["email_domain"]
+	  
+	  end
+      raise OmniAuth::Error, "LDAP accounts must provide an uid" if uid.nil?
 
       if @user = User.find_by_extern_uid_and_provider(uid, provider)
         @user
@@ -22,10 +30,15 @@ module Gitlab
       uid = auth.info.uid || auth.uid
       name = auth.info.name.force_encoding("utf-8")
       email = auth.info.email.downcase unless auth.info.email.nil?
+	  
+	  if email.nil?
+		  config = YAML.load_file("/home/gitlab/gitlab/config/gitlab.yml")
+		  email = uid.nickname + "@" + config["ldap"]["email_domain"]
+	  end
 
       ldap_prefix = ldap ? '(LDAP) ' : ''
-      raise OmniAuth::Error, "#{ldap_prefix}#{provider} does not provide an email"\
-        " address" if auth.info.email.blank?
+      #raise OmniAuth::Error, "#{ldap_prefix}#{provider} does not provide an email"\
+      #  " address" if auth.info.email.blank?
 
       log.info "#{ldap_prefix}Creating user from #{provider} login"\
         " {uid => #{uid}, name => #{name}, email => #{email}}"
@@ -50,6 +63,11 @@ module Gitlab
     def find_or_new_for_omniauth(auth)
       provider, uid = auth.provider, auth.uid
       email = auth.info.email.downcase unless auth.info.email.nil?
+	  
+	  if email.nil?
+		  config = YAML.load_file("/home/gitlab/gitlab/config/gitlab.yml")
+		  email = uid.nickname + "@" + config["ldap"]["email_domain"]
+	  end
 
       if @user = User.find_by_provider_and_extern_uid(provider, uid)
         @user
