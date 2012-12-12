@@ -4,7 +4,9 @@ class GroupsController < ApplicationController
 
   before_filter :group
   before_filter :projects
-  before_filter :add_project_abilities
+
+  # Authorize
+  before_filter :authorize_read_group!
 
   def show
     @events = Event.in_projects(project_ids).limit(20).offset(params[:offset] || 0)
@@ -45,7 +47,12 @@ class GroupsController < ApplicationController
   end
 
   def people
-    @users = group.users.all
+    @project = group.projects.find(params[:project_id]) if params[:project_id]
+    @users = @project ? @project.users : group.users
+
+    if @project
+      @team_member = @project.users_projects.new
+    end
   end
 
   protected
@@ -55,10 +62,17 @@ class GroupsController < ApplicationController
   end
 
   def projects
-    @projects ||= current_user.projects_sorted_by_activity.where(namespace_id: @group.id)
+    @projects ||= group.projects.authorized_for(current_user).sorted_by_activity
   end
 
   def project_ids
     projects.map(&:id)
+  end
+
+  # Dont allow unauthorized access to group
+  def authorize_read_group!
+    unless projects.present? or can?(current_user, :manage_group, @group)
+      return render_404
+    end
   end
 end

@@ -5,8 +5,21 @@ class DashboardController < ApplicationController
   before_filter :event_filter, only: :index
 
   def index
-    @groups = Group.where(id: current_user.projects.pluck(:namespace_id))
+    @groups = current_user.authorized_groups
+
+    @has_authorized_projects = @projects.count > 0
+
+    @projects = case params[:scope]
+                when 'personal' then
+                  @projects.personal(current_user)
+                when 'joined' then
+                  @projects.joined(current_user)
+                else
+                  @projects
+                end
+
     @projects = @projects.page(params[:page]).per(30)
+
     @events = Event.in_projects(current_user.project_ids)
     @events = @event_filter.apply_filter(@events)
     @events = @events.limit(20).offset(params[:offset] || 0)
@@ -43,7 +56,7 @@ class DashboardController < ApplicationController
   protected
 
   def projects
-    @projects = current_user.projects_sorted_by_activity
+    @projects = current_user.authorized_projects.sorted_by_activity
   end
 
   def event_filter

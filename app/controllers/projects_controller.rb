@@ -34,20 +34,10 @@ class ProjectsController < ProjectResourceController
   end
 
   def update
-    if params[:project].has_key?(:namespace_id)
-      namespace_id = params[:project].delete(:namespace_id)
-      if namespace_id == Namespace.global_id and project.namespace.present?
-        # Transfer to global namespace from anyone
-        project.transfer(nil)
-      elsif namespace_id.present? and namespace_id.to_i != project.namespace_id
-        # Transfer to someone namespace
-        namespace = Namespace.find(namespace_id)
-        project.transfer(namespace)
-      end
-    end
+    status = ProjectUpdateContext.new(project, current_user, params).execute
 
     respond_to do |format|
-      if project.update_attributes(params[:project])
+      if status
         flash[:notice] = 'Project was successfully updated.'
         format.html { redirect_to edit_project_path(project), notice: 'Project was successfully updated.' }
         format.js
@@ -99,6 +89,8 @@ class ProjectsController < ProjectResourceController
   end
 
   def destroy
+    return access_denied! unless can?(current_user, :remove_project, project)
+
     # Disable the UsersProject update_repository call, otherwise it will be
     # called once for every person removed from the project
     UsersProject.skip_callback(:destroy, :after, :update_repository)

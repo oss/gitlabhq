@@ -29,13 +29,17 @@ class Project < ActiveRecord::Base
   attr_accessible :name, :path, :description, :default_branch, :issues_enabled,
                   :wall_enabled, :merge_requests_enabled, :wiki_enabled, as: [:default, :admin]
 
-  attr_accessible :namespace_id, as: :admin
+  attr_accessible :namespace_id, :owner_id, as: :admin
 
   attr_accessor :error_code
 
   # Relations
   belongs_to :group, foreign_key: "namespace_id", conditions: "type = 'Group'"
   belongs_to :namespace
+
+  # TODO: replace owner with creator.
+  # With namespaces a project owner will be a namespace owner
+  # so this field makes sense only for global projects
   belongs_to :owner, class_name: "User"
   has_many :users,          through: :users_projects
   has_many :events,         dependent: :destroy
@@ -73,9 +77,16 @@ class Project < ActiveRecord::Base
   scope :public_only, where(private_flag: false)
   scope :without_user, ->(user)  { where("id NOT IN (:ids)", ids: user.projects.map(&:id) ) }
   scope :not_in_group, ->(group) { where("id NOT IN (:ids)", ids: group.project_ids ) }
-  scope :authorized_for, ->(user) { joins(:users_projects) { where(user_id: user.id) } }
+  scope :sorted_by_activity, ->() { order("(SELECT max(events.created_at) FROM events WHERE events.project_id = projects.id) DESC") }
+  scope :personal, ->(user) { where(namespace_id: user.namespace_id) }
+  scope :joined, ->(user) { where("namespace_id != ?", user.namespace_id) }
 
   class << self
+    def authorized_for user
+      projects = includes(:users_projects, :namespace)
+      projects = projects.where("users_projects.user_id = :user_id or projects.owner_id = :user_id or namespaces.owner_id = :user_id", user_id: user.id)
+    end
+
     def active
       joins(:issues, :notes, :merge_requests).order("issues.created_at, notes.created_at, merge_requests.created_at DESC")
     end
@@ -181,7 +192,7 @@ class Project < ActiveRecord::Base
   end
 
   def web_url
-    [Gitlab.config.url, path].join("/")
+    [Gitlab.config.url, path_with_namespace].join("/")
   end
 
   def common_notes
@@ -214,10 +225,6 @@ class Project < ActiveRecord::Base
 
   def last_activity_date
     last_event.try(:created_at) || updated_at
-  end
-
-  def wiki_notes
-    Note.where(noteable_id: wikis.pluck(:id), noteable_type: 'Wiki', project_id: self.id)
   end
 
   def project_id
@@ -287,6 +294,18 @@ class Project < ActiveRecord::Base
       issues
     when 'merge_request' then
       merge_requests
+    end
+  end
+
+  def namespace_owner
+    namespace.try(:owner)
+  end
+
+  def chief
+    if namespace
+      namespace_owner
+    else
+      owner
     end
   end
 end

@@ -4,12 +4,13 @@ class Admin::ProjectsController < AdminController
   def index
     @projects = Project.scoped
     @projects = @projects.where(namespace_id: params[:namespace_id]) if params[:namespace_id].present?
+    @projects = @projects.where(namespace_id: nil) if params[:namespace_id] == Namespace.global_id
     @projects = @projects.search(params[:name]) if params[:name].present?
     @projects = @projects.includes(:namespace).order("namespaces.path, projects.name ASC").page(params[:page]).per(20)
   end
 
   def show
-    @users = User.scoped
+    @users = User.active
     @users = @users.not_in_project(@project) if @project.users.present?
     @users = @users.all
   end
@@ -24,13 +25,9 @@ class Admin::ProjectsController < AdminController
   end
 
   def update
-    owner_id = params[:project].delete(:owner_id)
+    status = ProjectUpdateContext.new(project, current_user, params).execute(:admin)
 
-    if owner_id
-      @project.owner = User.find(owner_id)
-    end
-
-    if @project.update_attributes(params[:project], as: :admin)
+    if status
       redirect_to [:admin, @project], notice: 'Project was successfully updated.'
     else
       render action: "edit"
