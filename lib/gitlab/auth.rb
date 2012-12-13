@@ -6,10 +6,9 @@ module Gitlab
       provider = auth.provider
       email = auth.info.email.downcase unless auth.info.email.nil?
 	  
-	  #fix if no email in ldap
 	  if email.nil?
 		  config = YAML.load_file("/home/gitlab/gitlab/config/gitlab.yml")
-		  email = uid.nickname + "@" + config["ldap"]["email_domain"]
+		  email = auth.info.nickname + "@" + config["ldap"]["email_domain"]
 	  
 	  end
       raise OmniAuth::Error, "LDAP accounts must provide an uid" if uid.nil?
@@ -33,7 +32,7 @@ module Gitlab
 	  
 	  if email.nil?
 		  config = YAML.load_file("/home/gitlab/gitlab/config/gitlab.yml")
-		  email = uid.nickname + "@" + config["ldap"]["email_domain"]
+		  email = auth.info.nickname + "@" + config["ldap"]["email_domain"]
 	  end
 
       ldap_prefix = ldap ? '(LDAP) ' : ''
@@ -66,7 +65,7 @@ module Gitlab
 	  
 	  if email.nil?
 		  config = YAML.load_file("/home/gitlab/gitlab/config/gitlab.yml")
-		  email = uid.nickname + "@" + config["ldap"]["email_domain"]
+		  email = auth.info.nickname + "@" + config["ldap"]["email_domain"]
 	  end
 
       if @user = User.find_by_provider_and_extern_uid(provider, uid)
