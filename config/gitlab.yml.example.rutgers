@@ -33,9 +33,9 @@ ldap:
   enabled: true
   host: 'ldap.nbcs.rutgers.edu'
   base: 'ou=Justice League,o=Rutgers CSS,c=US'
-  port: 636
+  port: 389		#686=ssl, 389=tls
   uid: 'uid'
-  method: 'ssl' # plain
+  method: 'tls' #ssl=plain, tls=starttls
   bind_dn: null
   password: null
   email_domain: jla.rutgers.edu
