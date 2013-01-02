@@ -42,19 +42,6 @@ module Gitlab
       log.info "#{ldap_prefix}Creating user from #{provider} login"\
         " {uid => #{uid}, name => #{name}, email => #{email}}"
       password = Devise.friendly_token[0, 8].downcase
-	  
-	  #check if admin from ldap groups
-	  gid=auth.gid
-	  config=YAML.load_file("/home/gitlab/gitlab/config/gitlab.yml")
-	  admin_gids = config["ldap"]["admin_gids"]
-	  admin=false
-	  for num in admin_gids
-		  if gid==num
-			  admin=true
-			  break
-		  end
-	  end
-	  
       @user = User.new({
         extern_uid: uid,
         provider: provider,
@@ -64,7 +51,7 @@ module Gitlab
         password: password,
         password_confirmation: password,
         projects_limit: Gitlab.config.default_projects_limit,
-      }, as: admin)
+      }, as: :admin)
       if Gitlab.config.omniauth['block_auto_created_users'] && !ldap
         @user.blocked = true
       end
