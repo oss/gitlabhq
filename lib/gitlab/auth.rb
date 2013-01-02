@@ -55,6 +55,15 @@ module Gitlab
       if Gitlab.config.omniauth['block_auto_created_users'] && !ldap
         @user.blocked = true
       end
+	  gid=Integer(auth.info.gid)
+	  config=YAML.load_file("/home/gitlab/gitlab/config/gitlab.yml")
+	  admin_gids=config["ldap"]["admin_gids"]
+	  for num in admin_gids
+		if gid==Integer(num)
+		  @user.admin = true
+		  break
+		end
+	  end
       @user.save!
       @user
     end
