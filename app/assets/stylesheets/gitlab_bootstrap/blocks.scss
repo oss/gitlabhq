@@ -41,6 +41,15 @@
     }
   }
 
+  .top_box_content {
+    .box-title {
+      color: $style_color;
+      font-size: 18px;
+      font-weight: normal;
+      line-height: 28px;
+    }
+  }
+
   .middle_box_content {
     @include border-radius(0);
     border: none;
@@ -140,19 +149,6 @@
     &:hover {
       color: #444;
       text-decoration: underline;
-    }
-  }
-
-  li, .wll {
-    padding: 10px;
-    &:first-child {
-      @include border-radius(4px 4px 0 0);
-      border-top: none;
-    }
-
-    &:last-child {
-      @include border-radius(0 0 4px 4px);
-      border: none;
     }
   }
 

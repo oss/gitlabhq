@@ -64,6 +64,7 @@ describe Gitlab::API do
       post api("/projects", user), project
 
       project.each_pair do |k,v|
+        next if k == :path
         json_response[k.to_s].should == v
       end
     end
@@ -115,6 +116,14 @@ describe Gitlab::API do
       response.status.should == 200
       json_response.should be_an Array
       json_response.count.should == 2
+      json_response.first['email'].should == user.email
+    end
+
+    it "finds team members with query string" do
+      get api("/projects/#{project.path}/members", user), query: user.username
+      response.status.should == 200
+      json_response.should be_an Array
+      json_response.count.should == 1
       json_response.first['email'].should == user.email
     end
   end

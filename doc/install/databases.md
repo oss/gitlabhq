@@ -11,9 +11,6 @@ GitLab supports the following databases:
     # Install the database packages
     sudo apt-get install -y mysql-server mysql-client libmysqlclient-dev
 
-    # Install only the necessary gems
-    sudo -u gitlab -H bundle install --deployment --without development test postgres 
-
     # Login to MySQL
     $ mysql -u root -p
 
@@ -37,9 +34,6 @@ GitLab supports the following databases:
     # Install the database packages
     sudo apt-get install -y postgresql-9.1 libpq-dev
 
-    # Install only the necessary gems
-    sudo -u gitlab -H bundle install --deployment --without development test mysql
-
     # Login to PostgreSQL
     sudo -u postgres psql -d template1
 
@@ -55,14 +49,3 @@ GitLab supports the following databases:
     # Try connecting to the new database with the new user
     sudo -u gitlab -H psql -d gitlabhq_production
 
-
-
-# Configure GitLab
-
-    # Mysql
-    sudo -u gitlab cp config/database.yml.mysql config/database.yml
-
-    # PostgreSQL
-    sudo -u gitlab cp config/database.yml.postgresql config/database.yml
-
-Make sure to update username/password in config/database.yml.
