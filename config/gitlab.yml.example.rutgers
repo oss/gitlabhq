@@ -51,7 +51,7 @@ gravatar:
 ## LDAP settings
 ldap:
   enabled: true
-  host: 'ldap.mbcs.rutgers.edu'
+  host: 'ldap.nbcs.rutgers.edu'
   base: 'ou=Justice League,o=Rutgers CSS,c=US'
   port: 389
   uid: 'uid'
