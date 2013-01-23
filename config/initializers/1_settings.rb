@@ -36,7 +36,7 @@ end
 # Default settings
 Settings['ldap'] ||= Settingslogic.new({})
 Settings.ldap['enabled'] = false if Settings.ldap['enabled'].nil?
-
+Settings.ldap['admin_gids'] ||= []
 Settings['omniauth'] ||= Settingslogic.new({})
 Settings.omniauth['enabled']      = false if Settings.omniauth['enabled'].nil?
 Settings.omniauth['providers']  ||= []
