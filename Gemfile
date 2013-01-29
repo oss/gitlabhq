@@ -27,7 +27,9 @@ gem 'grack',         git: "https://github.com/gitlabhq/grack.git",          ref:
 gem 'grit_ext',      git: "https://github.com/gitlabhq/grit_ext.git",       ref: '8e6afc2da821354774aa4d1ee8a1aa2082f84a3e'
 
 # LDAP Auth
-gem 'gitlab_omniauth-ldap', '1.0.2', require: "omniauth-ldap"
+# gem 'gitlab_omniauth-ldap', '1.0.2', require: "omniauth-ldap"
+# Fixed for Rutgers Adaptation
+gem 'gitlab_omniauth-ldap', git: "https://github.com/oss/omniauth-ldap.git",       ref: 'f1b472ebfceb0e7d7c125027c982cab2cb76c4fd', branch: 'dev', require: "omniauth-ldap"
 
 # Dump db to yml file. Mostly used to migrate from sqlite to mysql
 gem 'gitlab_yaml_db', '1.0.0', require: "yaml_db"

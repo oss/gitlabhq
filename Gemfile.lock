@@ -66,6 +66,18 @@ GIT
       http_parser.rb (~> 0.5.3)
       multi_json (~> 1.0)
 
+GIT
+  remote: https://github.com/oss/omniauth-ldap.git
+  revision: f1b472ebfceb0e7d7c125027c982cab2cb76c4fd
+  ref: f1b472ebfceb0e7d7c125027c982cab2cb76c4fd
+  branch: dev
+  specs:
+    gitlab_omniauth-ldap (1.0.2)
+      net-ldap (~> 0.2.2)
+      omniauth (~> 1.0)
+      pyu-ruby-sasl (~> 0.0.3.1)
+      rubyntlm (~> 0.1.1)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -189,11 +201,6 @@ GEM
       pygments.rb (>= 0.2.13)
     github-markup (0.7.4)
     gitlab_meta (4.0)
-    gitlab_omniauth-ldap (1.0.2)
-      net-ldap (~> 0.2.2)
-      omniauth (~> 1.0)
-      pyu-ruby-sasl (~> 0.0.3.1)
-      rubyntlm (~> 0.1.1)
     gitlab_yaml_db (1.0.0)
     gitolite (1.1.0)
       gratr19 (~> 0.4.4.1)
@@ -495,7 +502,7 @@ DEPENDENCIES
   github-linguist (~> 2.3.4)
   github-markup (~> 0.7.4)
   gitlab_meta (= 4.0)
-  gitlab_omniauth-ldap (= 1.0.2)
+  gitlab_omniauth-ldap!
   gitlab_yaml_db (= 1.0.0)
   gitolite (= 1.1.0)
   grack!
