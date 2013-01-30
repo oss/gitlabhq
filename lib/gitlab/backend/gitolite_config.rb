@@ -162,6 +162,9 @@ module Gitlab
       # Add write permissions
       repo.add_permission("RW+", "", name_writers) unless name_writers.blank?
       repo.add_permission("RW+", "", name_masters) unless name_masters.blank?
+      
+	  # Allow users to access repos without ssh key (bugfix)
+	  repo.add_permission("RW+", "", Gitlab.config.gitolite.admin_key)
 
       # Add sharedRepository config
       repo.set_git_config("core.sharedRepository", "0660")
