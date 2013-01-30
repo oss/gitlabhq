@@ -60,7 +60,7 @@ ldap:
   password: null
   # List of LDAP gid numbers to be made admin when user is created
   # Leave as [] or null to disable
-   admin_gids: [11001, 31001]
+  admin_gids: [11001, 31001]
   # If not all LDAP users have email entries, default to their username at this domain
   # Set as null to disable
   email_domain: 'jla.rutgers.edu'
