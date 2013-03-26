@@ -22,10 +22,8 @@
 #  linkedin               :string(255)      default(""), not null
 #  twitter                :string(255)      default(""), not null
 #  authentication_token   :string(255)
-#  dark_scheme            :boolean          default(FALSE), not null
 #  theme_id               :integer          default(1), not null
 #  bio                    :string(255)
-#  blocked                :boolean          default(FALSE), not null
 #  failed_attempts        :integer          default(0)
 #  locked_at              :datetime
 #  extern_uid             :string(255)
@@ -33,6 +31,8 @@
 #  username               :string(255)
 #  can_create_group       :boolean          default(TRUE), not null
 #  can_create_team        :boolean          default(TRUE), not null
+#  state                  :string(255)
+#  color_scheme_id        :integer          default(1), not null
 #
 
 require 'spec_helper'
@@ -69,26 +69,8 @@ describe User do
 
   describe "Respond to" do
     it { should respond_to(:is_admin?) }
-    it { should respond_to(:identifier) }
     it { should respond_to(:name) }
     it { should respond_to(:private_token) }
-  end
-
-  describe '#identifier' do
-    it "should return valid identifier" do
-      user = build(:user, email: "test@mail.com")
-      user.identifier.should == "test_mail_com"
-    end
-
-    it "should return identifier without + sign" do
-      user = build(:user, email: "test+foo@mail.com")
-      user.identifier.should == "test_foo_mail_com"
-    end
-
-    it "should conform to Gitolite's required identifier pattern" do
-      user = build(:user, email: "_test@example.com")
-      user.identifier.should == 'test_example_com'
-    end
   end
 
   describe '#generate_password' do
@@ -158,7 +140,7 @@ describe User do
 
     it "should block user" do
       user.block
-      user.blocked.should be_true
+      user.blocked?.should be_true
     end
   end
 
@@ -167,7 +149,7 @@ describe User do
       User.delete_all
       @user = create :user
       @admin = create :user, admin: true
-      @blocked = create :user, blocked: true
+      @blocked = create :user, state: :blocked
     end
 
     it { User.filter("admins").should == [@admin] }

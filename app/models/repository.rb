@@ -1,4 +1,6 @@
 class Repository
+  include Gitlab::Popen
+
   # Repository directory name with namespace direcotry
   # Examples:
   #   gitlab/gitolite
@@ -25,7 +27,7 @@ class Repository
   end
 
   def path_to_repo
-    @path_to_repo ||= File.join(Gitlab.config.gitolite.repos_path, "#{path_with_namespace}.git")
+    @path_to_repo ||= File.join(Gitlab.config.gitlab_shell.repos_path, "#{path_with_namespace}.git")
   end
 
   def repo
@@ -58,25 +60,6 @@ class Repository
 
   def commits_between(from, to)
     Commit.commits_between(repo, from, to)
-  end
-
-  def has_post_receive_file?
-    !!hook_file
-  end
-
-  def valid_post_receive_file?
-    valid_hook_file == hook_file
-  end
-
-  def valid_hook_file
-    @valid_hook_file ||= File.read(Rails.root.join('lib', 'hooks', 'post-receive'))
-  end
-
-  def hook_file
-    @hook_file ||= begin
-                     hook_path = File.join(path_to_repo, 'hooks', 'post-receive')
-                     File.read(hook_path) if File.exists?(hook_path)
-                   end
   end
 
   # Returns an Array of branch names
@@ -156,7 +139,7 @@ class Repository
     file_path = File.join(storage_path, self.path_with_namespace, file_name)
 
     # Put files into a directory before archiving
-    prefix = self.path_with_namespace + "/"
+    prefix = File.basename(self.path_with_namespace) + "/"
 
     # Create file if not exists
     unless File.exists?(file_path)
@@ -165,5 +148,22 @@ class Repository
     end
 
     file_path
+  end
+
+  # Return repo size in megabytes
+  # Cached in redis
+  def size
+    Rails.cache.fetch(cache_key(:size)) do
+      size = popen('du -s', path_to_repo).first.strip.to_i
+      (size.to_f / 1024).round(2)
+    end
+  end
+
+  def expire_cache
+    Rails.cache.delete(cache_key(:size))
+  end
+
+  def cache_key(type)
+    "#{type}:#{path_with_namespace}"
   end
 end

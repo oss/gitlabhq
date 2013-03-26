@@ -43,8 +43,8 @@ class Note < ActiveRecord::Base
 
   # Scopes
   scope :for_commit_id, ->(commit_id) { where(noteable_type: "Commit", commit_id: commit_id) }
-  scope :inline, where("line_code IS NOT NULL")
-  scope :not_inline, where("line_code IS NULL")
+  scope :inline, -> { where("line_code IS NOT NULL") }
+  scope :not_inline, -> { where("line_code IS NULL") }
 
   scope :common, ->{ where(noteable_type: ["", nil]) }
   scope :fresh, ->{ order("created_at ASC, id ASC") }
@@ -138,7 +138,7 @@ class Note < ActiveRecord::Base
       super
     end
   # Temp fix to prevent app crash
-  # if note commit id doesnt exist
+  # if note commit id doesn't exist
   rescue
     nil
   end

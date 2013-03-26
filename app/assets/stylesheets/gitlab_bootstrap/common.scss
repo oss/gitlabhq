@@ -2,6 +2,7 @@
 .cgray { color:gray }
 .cred { color:#D12F19 }
 .cgreen { color:#4a2 }
+.cblue { color:#29A }
 .cblack { color:#111 }
 .cdark { color:#444 }
 .cwhite { color:#fff!important }
@@ -20,6 +21,7 @@
 .hint { font-style: italic; color: #999; }
 .light { color: #888 }
 .tiny { font-weight: normal }
+.vtop { vertical-align: top; }
 
 
 /** ALERT MESSAGES **/
@@ -28,6 +30,8 @@
   color: #777;
   border-color: #DDD;
 }
+
+.well { padding: 15px; }
 
 /** HELPERS **/
 .nothing_here_message {
@@ -68,4 +72,8 @@ fieldset legend { font-size: 17px; }
   .current {
     border-bottom: 2px solid $style_color;
   }
+}
+
+.tab-content {
+  overflow: visible;
 }

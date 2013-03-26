@@ -2,6 +2,7 @@ require "spec_helper"
 
 describe GitlabMarkdownHelper do
   include ApplicationHelper
+  include IssuesHelper
 
   let!(:project) { create(:project) }
 
@@ -84,7 +85,7 @@ describe GitlabMarkdownHelper do
 
     describe "referencing a team member" do
       let(:actual)   { "@#{user.username} you are right." }
-      let(:expected) { project_team_member_path(project, member) }
+      let(:expected) { user_path(user) }
 
       before do
         project.team << [user, :master]
@@ -360,6 +361,30 @@ describe GitlabMarkdownHelper do
 
     it "should generate absolute urls for emoji" do
       markdown(":smile:").should include("src=\"#{url_to_image("emoji/smile")}")
+    end
+  end
+
+  describe "#render_wiki_content" do
+    before do
+      @wiki = stub('WikiPage')
+      @wiki.stub(:content).and_return('wiki content')
+    end
+
+    it "should use Gitlab Flavored Markdown for markdown files" do
+      @wiki.stub(:format).and_return(:markdown)
+
+      helper.should_receive(:markdown).with('wiki content')
+
+      helper.render_wiki_content(@wiki)
+    end
+
+    it "should use the Gollum renderer for all other file types" do
+      @wiki.stub(:format).and_return(:rdoc)
+      formatted_content_stub = stub('formatted_content')
+      formatted_content_stub.should_receive(:html_safe)
+      @wiki.stub(:formatted_content).and_return(formatted_content_stub)
+
+      helper.render_wiki_content(@wiki)
     end
   end
 end

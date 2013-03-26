@@ -1,3 +1,5 @@
+require 'gitlab/satellite/satellite'
+
 class MergeRequestsController < ProjectResourceController
   before_filter :module_enabled
   before_filter :merge_request, only: [:edit, :update, :show, :commits, :diffs, :automerge, :automerge_check, :ci_status]
@@ -73,14 +75,15 @@ class MergeRequestsController < ProjectResourceController
     if @merge_request.unchecked?
       @merge_request.check_if_can_be_merged
     end
-    render json: {state: @merge_request.human_state}
+    render json: {merge_status: @merge_request.merge_status_name}
   rescue Gitlab::SatelliteNotExistError
-    render json: {state: :no_satellite}
+    render json: {merge_status: :no_satellite}
   end
 
   def automerge
-    return access_denied! unless can?(current_user, :accept_mr, @project)
-    if @merge_request.open? && @merge_request.can_be_merged?
+    return access_denied! unless allowed_to_merge?
+
+    if @merge_request.opened? && @merge_request.can_be_merged?
       @merge_request.should_remove_source_branch = params[:should_remove_source_branch]
       @merge_request.automerge!(current_user)
       @status = true
@@ -125,12 +128,12 @@ class MergeRequestsController < ProjectResourceController
   end
 
   def validates_merge_request
-    # Show git not found page if target branch doesnt exist
-    return git_not_found! unless @project.repo.heads.map(&:name).include?(@merge_request.target_branch)
+    # Show git not found page if target branch doesn't exist
+    return invalid_mr unless @project.repo.heads.map(&:name).include?(@merge_request.target_branch)
 
-    # Show git not found page if source branch doesnt exist
+    # Show git not found page if source branch doesn't exist
     # and there is no saved commits between source & target branch
-    return git_not_found! if !@project.repo.heads.map(&:name).include?(@merge_request.source_branch) && @merge_request.commits.blank?
+    return invalid_mr if !@project.repo.heads.map(&:name).include?(@merge_request.source_branch) && @merge_request.commits.blank?
   end
 
   def define_show_vars
@@ -140,6 +143,24 @@ class MergeRequestsController < ProjectResourceController
     # Get commits from repository
     # or from cache if already merged
     @commits = @merge_request.commits
-    @commits = CommitDecorator.decorate(@commits)
+    @commits = CommitDecorator.decorate_collection(@commits)
+
+    @allowed_to_merge = allowed_to_merge?
+    @show_merge_controls = @merge_request.opened? && @commits.any? && @allowed_to_merge
+  end
+
+  def allowed_to_merge?
+    action = if project.protected_branch?(@merge_request.target_branch)
+               :push_code_to_protected_branches
+             else
+               :push_code
+             end
+
+    can?(current_user, action, @project)
+  end
+
+  def invalid_mr
+    # Render special view for MR with removed source or target branch
+    render 'invalid'
   end
 end

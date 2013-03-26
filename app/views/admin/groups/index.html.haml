@@ -16,6 +16,7 @@
       %th
         Name
         %i.icon-sort-down
+      %th Description
       %th Path
       %th Projects
       %th Owner
@@ -25,11 +26,12 @@
     %tr
       %td
         %strong= link_to group.name, [:admin, group]
+      %td= truncate group.description
       %td= group.path
       %td= group.projects.count
       %td
         = link_to group.owner_name, admin_user_path(group.owner)
       %td.bgred
-        = link_to 'Rename', edit_admin_group_path(group), id: "edit_#{dom_id(group)}", class: "btn btn-small"
+        = link_to 'Edit', edit_admin_group_path(group), id: "edit_#{dom_id(group)}", class: "btn btn-small"
         = link_to 'Destroy', [:admin, group], confirm: "REMOVE #{group.name}? Are you sure?", method: :delete, class: "btn btn-small btn-remove"
 = paginate @groups, theme: "admin"

@@ -88,6 +88,39 @@ describe Gitlab::API do
         post api("/groups", admin), {:name => "Duplicate Test", :path => group2.path}
         response.status.should == 404
       end
+
+      it "should return 400 bad request error if name not given" do
+        post api("/groups", admin), { :path => group2.path }
+        response.status.should == 400
+      end
+
+      it "should return 400 bad request error if path not given" do
+        post api("/groups", admin), { :name => 'test' }
+        response.status.should == 400
+      end
+    end
+  end
+
+  describe "POST /groups/:id/projects/:project_id" do
+    let(:project) { create(:project) }
+    before(:each) do
+       project.stub!(:transfer).and_return(true) 
+       Project.stub(:find).and_return(project) 
+    end
+
+
+    context "when authenticated as user" do
+      it "should not transfer project to group" do
+        post api("/groups/#{group1.id}/projects/#{project.id}", user2)
+        response.status.should == 403
+      end
+    end
+
+    context "when authenticated as admin" do
+      it "should transfer project to group" do
+        project.should_receive(:transfer)
+        post api("/groups/#{group1.id}/projects/#{project.id}", admin)
+      end
     end
   end
 end

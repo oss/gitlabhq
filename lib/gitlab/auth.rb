@@ -49,8 +49,10 @@ module Gitlab
         password_confirmation: password,
         projects_limit: Gitlab.config.gitlab.default_projects_limit,
       }, as: :admin)
+      @user.save!
+
       if Gitlab.config.omniauth['block_auto_created_users'] && !ldap
-        @user.blocked = true
+        @user.block
       end
       # Check if user is in an LDAP group specified to be admins in gitlab.yml
       gid = auth.info.gid.to_i

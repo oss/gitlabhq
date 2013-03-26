@@ -46,9 +46,9 @@ describe Key do
         key.should_not be_valid
       end
 
-      it "does accept the same key for another project" do
+      it "does not accept the same key for another project" do
         key = build(:key, project_id: 0)
-        key.should be_valid
+        key.should_not be_valid
       end
     end
 
@@ -73,8 +73,12 @@ describe Key do
       build(:key, user: user).should be_valid
     end
 
-    it "rejects the unfingerprintable key" do
+    it "rejects the unfingerprintable key (contains space in middle)" do
       build(:key_with_a_space_in_the_middle).should_not be_valid
+    end
+
+    it "rejects the unfingerprintable key (not a key)" do
+      build(:invalid_key).should_not be_valid
     end
   end
 end

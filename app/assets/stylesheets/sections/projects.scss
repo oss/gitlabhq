@@ -6,7 +6,8 @@
   .side {
     @extend .pull-right;
 
-    .projects_box {
+    .ui-box {
+      margin: 3px;
       > .title {
         padding: 2px 15px;
       }
@@ -80,6 +81,7 @@
     border: 1px solid #BBB;
     box-shadow: none;
     margin-left: -1px;
+    background: #FFF;
   }
 }
 
@@ -112,6 +114,23 @@ ul.nav.nav-projects-tabs {
       a {
         font-weight: bold;
       }
+    }
+  }
+}
+
+.team_member_row form {
+  margin: 0px;
+}
+
+.public-projects {
+  li {
+    margin-top: 8px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #eee;
+
+    .description {
+      margin-left: 22px;
+      color: #aaa;
     }
   }
 }

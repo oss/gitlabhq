@@ -73,11 +73,9 @@ module TabHelper
   end
 
   def project_tab_class
-    [:show, :files, :edit, :update].each do |action|
-      return "active" if current_page?(controller: "projects", action: action, id: @project)
-    end
+    return "active" if current_page?(controller: "projects", action: :edit, id: @project)
 
-    if ['snippets', 'services', 'hooks', 'deploy_keys', 'team_members'].include? controller.controller_name
+    if ['services', 'hooks', 'deploy_keys', 'team_members'].include? controller.controller_name
      "active"
     end
   end

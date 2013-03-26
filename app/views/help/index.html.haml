@@ -1,13 +1,13 @@
 %h3.page_title
   GITLAB
   .pull-right
-    %span= Gitlab::Version
-    %small= Gitlab::Revision
+    %span= Gitlab::VERSION
+    %small= Gitlab::REVISION
 %hr
 %p.lead
   Self Hosted Git Management
   %br
-  Fast, secure and stable solution based on Ruby on Rails & Gitolite.
+  Fast, secure and stable solution based on Ruby on Rails.
 
 %br
 
@@ -22,7 +22,7 @@
           = mail_to Gitlab.config.gitlab.support_email, "support contact"
         %li
           Use the
-          = link_to "search bar", '#', onclick: "$("#search").focus();"
+          = link_to "search bar", '#', onclick: "$('#search').focus();"
           on the top of this page
         %li
           Ask in our

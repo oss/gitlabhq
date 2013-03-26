@@ -2,16 +2,17 @@
 #
 # Table name: user_teams
 #
-#  id         :integer          not null, primary key
-#  name       :string(255)
-#  path       :string(255)
-#  owner_id   :integer
-#  created_at :datetime         not null
-#  updated_at :datetime         not null
+#  id          :integer          not null, primary key
+#  name        :string(255)
+#  path        :string(255)
+#  owner_id    :integer
+#  created_at  :datetime         not null
+#  updated_at  :datetime         not null
+#  description :string(255)      default(""), not null
 #
 
 class UserTeam < ActiveRecord::Base
-  attr_accessible :name, :owner_id, :path
+  attr_accessible :name, :description, :owner_id, :path
 
   belongs_to :owner, class_name: User
 
@@ -21,8 +22,12 @@ class UserTeam < ActiveRecord::Base
   has_many :projects, through: :user_team_project_relationships
   has_many :members,  through: :user_team_user_relationships, source: :user
 
-  validates :name, presence: true, uniqueness: true
   validates :owner, presence: true
+  validates :name, presence: true, uniqueness: true,
+            length: { within: 0..255 },
+            format: { with: Gitlab::Regex.name_regex,
+                      message: "only letters, digits, spaces & '_' '-' '.' allowed." }
+  validates :description, length: { within: 0..255 }
   validates :path, uniqueness: true, presence: true, length: { within: 1..255 },
             format: { with: Gitlab::Regex.path_regex,
                       message: "only letters, digits & '_' '-' '.' allowed. Letter should be first" }
@@ -65,6 +70,9 @@ class UserTeam < ActiveRecord::Base
   end
 
   def add_members(users, access, group_admin)
+    # reject existing users
+    users.reject! { |id| member_ids.include?(id.to_i) }
+
     users.each do |user|
       add_member(user, access, group_admin)
     end

@@ -1,13 +1,13 @@
 %h3.page_title
   = "Merge Request ##{@merge_request.id}:"
   &nbsp;
-  %span.label_branch= @merge_request.source_branch
+  %span.label-branch= @merge_request.source_branch
   &rarr;
-  %span.label_branch= @merge_request.target_branch
+  %span.label-branch= @merge_request.target_branch
 
   %span.pull-right
     - if can?(current_user, :modify_merge_request, @merge_request)
-      - if @merge_request.open?
+      - if @merge_request.opened?
         .left.btn-group
           %a.btn.grouped.dropdown-toggle{ data: {toggle: :dropdown} }
             %i.icon-download-alt
@@ -17,7 +17,7 @@
             %li= link_to "Email Patches", project_merge_request_path(@project, @merge_request, format: :patch)
             %li= link_to "Plain Diff",    project_merge_request_path(@project, @merge_request, format: :diff)
 
-        = link_to 'Close', project_merge_request_path(@project, @merge_request, merge_request: {closed: true }, status_only: true), method: :put, class: "btn grouped btn-close", title: "Close merge request"
+        = link_to 'Close', project_merge_request_path(@project, @merge_request, merge_request: {state_event: :close }), method: :put, class: "btn grouped btn-close", title: "Close merge request"
 
         = link_to edit_project_merge_request_path(@project, @merge_request), class: "btn grouped" do
           %i.icon-edit

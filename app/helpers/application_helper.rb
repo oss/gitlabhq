@@ -72,9 +72,9 @@ module ApplicationHelper
   end
 
   def search_autocomplete_source
-    projects = current_user.authorized_projects.map { |p| { label: "project: #{p.name_with_namespace}", url: project_path(p) } }
-    groups = current_user.authorized_groups.map { |group| { label: "group: #{group.name}", url: group_path(group) } }
-    teams = current_user.authorized_teams.map { |team| { label: "team: #{team.name}", url: team_path(team) } }
+    projects = current_user.authorized_projects.map { |p| { label: "project: #{simple_sanitize(p.name_with_namespace)}", url: project_path(p) } }
+    groups = current_user.authorized_groups.map { |group| { label: "group: #{simple_sanitize(group.name)}", url: group_path(group) } }
+    teams = current_user.authorized_teams.map { |team| { label: "team: #{simple_sanitize(team.name)}", url: team_path(team) } }
 
     default_nav = [
       { label: "My Profile", url: profile_path },
@@ -98,19 +98,19 @@ module ApplicationHelper
     project_nav = []
     if @project && @project.repository && @project.repository.root_ref
       project_nav = [
-        { label: "#{@project.name_with_namespace} - Issues",   url: project_issues_path(@project) },
-        { label: "#{@project.name_with_namespace} - Commits",  url: project_commits_path(@project, @ref || @project.repository.root_ref) },
-        { label: "#{@project.name_with_namespace} - Merge Requests", url: project_merge_requests_path(@project) },
-        { label: "#{@project.name_with_namespace} - Milestones", url: project_milestones_path(@project) },
-        { label: "#{@project.name_with_namespace} - Snippets", url: project_snippets_path(@project) },
-        { label: "#{@project.name_with_namespace} - Team",     url: project_team_index_path(@project) },
-        { label: "#{@project.name_with_namespace} - Tree",     url: project_tree_path(@project, @ref || @project.repository.root_ref) },
-        { label: "#{@project.name_with_namespace} - Wall",     url: wall_project_path(@project) },
-        { label: "#{@project.name_with_namespace} - Wiki",     url: project_wikis_path(@project) },
+        { label: "#{simple_sanitize(@project.name_with_namespace)} - Issues",   url: project_issues_path(@project) },
+        { label: "#{simple_sanitize(@project.name_with_namespace)} - Commits",  url: project_commits_path(@project, @ref || @project.repository.root_ref) },
+        { label: "#{simple_sanitize(@project.name_with_namespace)} - Merge Requests", url: project_merge_requests_path(@project) },
+        { label: "#{simple_sanitize(@project.name_with_namespace)} - Milestones", url: project_milestones_path(@project) },
+        { label: "#{simple_sanitize(@project.name_with_namespace)} - Snippets", url: project_snippets_path(@project) },
+        { label: "#{simple_sanitize(@project.name_with_namespace)} - Team",     url: project_team_index_path(@project) },
+        { label: "#{simple_sanitize(@project.name_with_namespace)} - Tree",     url: project_tree_path(@project, @ref || @project.repository.root_ref) },
+        { label: "#{simple_sanitize(@project.name_with_namespace)} - Wall",     url: project_wall_path(@project) },
+        { label: "#{simple_sanitize(@project.name_with_namespace)} - Wiki",     url: project_wikis_path(@project) },
       ]
     end
 
-    [groups, projects, default_nav, project_nav, help_nav].flatten.to_json
+    [groups, teams, projects, default_nav, project_nav, help_nav].flatten.to_json
   end
 
   def emoji_autocomplete_source
@@ -128,7 +128,13 @@ module ApplicationHelper
   end
 
   def user_color_scheme_class
-    current_user.dark_scheme ? :black : :white
+    case current_user.color_scheme_id
+    when 1 then 'white'
+    when 2 then 'black'
+    when 3 then 'solarized-dark'
+    else
+      'white'
+    end
   end
 
   def show_last_push_widget?(event)
@@ -159,8 +165,20 @@ module ApplicationHelper
               alt: "Sign in with #{provider.to_s.titleize}")
   end
 
-  def image_url(source)
-    root_url + path_to_image(source)
+  def simple_sanitize str
+    sanitize(str, tags: %w(a span))
   end
+
+  def image_url(source)
+    # prevent relative_root_path being added twice (it's part of root_url and path_to_image)
+    root_url.sub(/#{root_path}$/, path_to_image(source))
+  end
+
   alias_method :url_to_image, :image_url
+
+  def users_select_tag(id, opts = {})
+    css_class = "ajax-users-select"
+    css_class << " multiselect" if opts[:multiple]
+    hidden_field_tag(id, '', class: css_class)
+  end
 end

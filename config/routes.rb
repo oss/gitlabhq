@@ -8,6 +8,7 @@ Gitlab::Application.routes.draw do
 
   # API
   require 'api'
+  Gitlab::API.logger Rails.logger
   mount Gitlab::API => '/api'
 
   constraint = lambda { |request| request.env["warden"].authenticate? and request.env['warden'].user.admin? }
@@ -18,9 +19,9 @@ Gitlab::Application.routes.draw do
   # Enable Grack support
   mount Grack::Bundle.new({
     git_path:     Gitlab.config.git.bin_path,
-    project_root: Gitlab.config.gitolite.repos_path,
-    upload_pack:  Gitlab.config.gitolite.upload_pack,
-    receive_pack: Gitlab.config.gitolite.receive_pack
+    project_root: Gitlab.config.gitlab_shell.repos_path,
+    upload_pack:  Gitlab.config.gitlab_shell.upload_pack,
+    receive_pack: Gitlab.config.gitlab_shell.receive_pack
   }), at: '/', constraints: lambda { |request| /[-\/\w\.]+\.git\//.match(request.path_info) }
 
   #
@@ -44,6 +45,11 @@ Gitlab::Application.routes.draw do
     resources :projects, only: [:index]
     root to: "projects#index"
   end
+
+  #
+  # Attachments serving
+  #
+  get 'files/:type/:id/:filename' => 'files#download', constraints: { id: /\d+/, type: /[a-z]+/, filename:  /.+/ }
 
   #
   # Admin Area
@@ -129,7 +135,7 @@ Gitlab::Application.routes.draw do
   #
   # Groups Area
   #
-  resources :groups, constraints: { id: /[^\/]+/ }  do
+  resources :groups, constraints: {id: /(?:[^.]|\.(?!atom$))+/, format: /atom/}  do
     member do
       get :issues
       get :merge_requests
@@ -142,7 +148,7 @@ Gitlab::Application.routes.draw do
   #
   # Teams Area
   #
-  resources :teams, constraints: { id: /[^\/]+/ } do
+  resources :teams, constraints: {id: /(?:[^.]|\.(?!atom$))+/, format: /atom/} do
     member do
       get :issues
       get :merge_requests
@@ -160,29 +166,32 @@ Gitlab::Application.routes.draw do
   #
   # Project Area
   #
-  resources :projects, constraints: { id: /[a-zA-Z.0-9_\-\/]+/ }, except: [:new, :create, :index], path: "/" do
-    member do
-      get "wall"
-      get "files"
-    end
-
+  resources :projects, constraints: { id: /(?:[a-zA-Z.0-9_\-]+\/)?[a-zA-Z.0-9_\-]+/ }, except: [:new, :create, :index], path: "/" do
+    resources :blob,    only: [:show], constraints: {id: /.+/}
     resources :tree,    only: [:show, :edit, :update], constraints: {id: /.+/}
     resources :commit,  only: [:show], constraints: {id: /[[:alnum:]]{6,40}/}
-    resources :commits, only: [:show], constraints: {id: /.+/}
+    resources :commits, only: [:show], constraints: {id: /(?:[^.]|\.(?!atom$))+/, format: /atom/}
     resources :compare, only: [:index, :create]
     resources :blame,   only: [:show], constraints: {id: /.+/}
-    resources :blob,    only: [:show], constraints: {id: /.+/}
-    resources :graph,   only: [:show], constraints: {id: /.+/}
+    resources :graph,   only: [:show], constraints: {id: /(?:[^.]|\.(?!json$))+/, format: /json/}
     match "/compare/:from...:to" => "compare#show", as: "compare",
                     :via => [:get, :post], constraints: {from: /.+/, to: /.+/}
 
     resources :wikis, only: [:show, :edit, :destroy, :create] do
       collection do
         get :pages
+        put ':id' => 'wikis#update'
+        get :git_access
       end
 
       member do
         get "history"
+      end
+    end
+
+    resource :wall, only: [:show] do
+      member do
+        get 'notes'
       end
     end
 

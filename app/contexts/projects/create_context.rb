@@ -32,7 +32,23 @@ module Projects
         @project.namespace_id = current_user.namespace_id
       end
 
+      # Disable less important features by default
+      @project.wall_enabled = false
+      @project.snippets_enabled = false
+
       @project.creator = current_user
+
+      # Import project from cloneable resource
+      if @project.valid? && @project.import_url.present?
+        shell = Gitlab::Shell.new
+        if shell.import_repository(@project.path_with_namespace, @project.import_url)
+          # We should create satellite for imported repo
+          @project.satellite.create unless @project.satellite.exists?
+          true
+        else
+          @project.errors.add(:import_url, 'cannot clone repo')
+        end
+      end
 
       if @project.save
         @project.users_projects.create(project_access: UsersProject::MASTER, user: current_user)

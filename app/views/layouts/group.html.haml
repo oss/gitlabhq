@@ -2,8 +2,8 @@
 %html{ lang: "en"}
   = render "layouts/head", title: "#{@group.name}"
   %body{class: "#{app_theme} application"}
-    = render "layouts/flash"
     = render "layouts/head_panel", title: "group: #{@group.name}"
+    = render "layouts/flash"
     .container
       %ul.main_menu
         = nav_link(path: 'groups#show', html_options: {class: 'home'}) do
@@ -17,15 +17,12 @@
           = link_to merge_requests_group_path(@group) do
             Merge Requests
             %span.count= current_user.cared_merge_requests.opened.of_group(@group).count
-        = nav_link(path: 'groups#search') do
-          = link_to "Search", search_group_path(@group)
         = nav_link(path: 'groups#people') do
           = link_to "People", people_group_path(@group)
 
         - if can?(current_user, :manage_group, @group)
           = nav_link(path: 'groups#edit') do
             = link_to edit_group_path(@group), class: "tab " do
-              %i.icon-edit
-              Edit Group
+              Settings
 
       .content= yield

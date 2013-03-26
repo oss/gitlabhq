@@ -9,7 +9,7 @@ class AdminTeams < Spinach::FeatureSteps
   end
 
   And 'Create gitlab user "John"' do
-    @user = create(:user, :name => "John")
+    @user = create(:user, name: "John")
   end
 
   And 'I click new team link' do
@@ -18,6 +18,7 @@ class AdminTeams < Spinach::FeatureSteps
 
   And 'submit form with new team info' do
     fill_in 'user_team_name', with: 'gitlab'
+    fill_in 'user_team_description', with: 'description'
     click_button 'Create team'
   end
 
@@ -27,6 +28,7 @@ class AdminTeams < Spinach::FeatureSteps
 
   And 'I should see newly created team' do
     page.should have_content "Team: gitlab"
+    page.should have_content "description"
   end
 
   When 'I visit admin teams page' do
@@ -44,14 +46,14 @@ class AdminTeams < Spinach::FeatureSteps
   Then 'I should see only me in members table' do
     members_list = find("#members_list .member")
     members_list.should have_content(current_user.name)
-    members_list.should have_content(current_user.email)
+    members_list.should have_content(current_user.username)
   end
 
   When 'I select user "John" from user list as "Developer"' do
     @user ||= User.find_by_name("John")
     within "#team_members" do
-      select @user.name, :from => "user_ids"
-      select "Developer", :from => "default_project_access"
+      select "#{@user.name} (#{@user.username})", from: "user_ids"
+      select "Developer", from: "default_project_access"
     end
   end
 
@@ -89,8 +91,8 @@ class AdminTeams < Spinach::FeatureSteps
   When 'I select project "Shop" with max access "Reporter"' do
     @project ||= Project.find_by_name("Shop")
     within "#assign_projects" do
-      select @project.name, :from => "project_ids"
-      select "Reporter", :from => "greatest_project_access"
+      select @project.name, from: "project_ids"
+      select "Reporter", from: "greatest_project_access"
     end
 
   end
@@ -127,8 +129,8 @@ class AdminTeams < Spinach::FeatureSteps
   When 'I select user "Jimm" ub team members list as "Master"' do
     user = User.find_by_name("Jimm")
     within "#team_members" do
-      select user.name, :from => "user_ids"
-      select "Developer", :from => "default_project_access"
+      select "#{user.name} (#{user.username})", from: "user_ids"
+      select "Developer", from: "default_project_access"
     end
   end
 

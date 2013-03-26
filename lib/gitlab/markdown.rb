@@ -17,7 +17,7 @@ module Gitlab
   # Examples
   #
   #   >> gfm("Hey @david, can you fix this?")
-  #   => "Hey <a href="/gitlab/team_members/1">@david</a>, can you fix this?"
+  #   => "Hey <a href="/u/david">@david</a>, can you fix this?"
   #
   #   >> gfm("Commit 35d5f7c closes #1234")
   #   => "Commit <a href="/gitlab/commits/35d5f7c">35d5f7c</a> closes <a href="/gitlab/issues/1234">#1234</a>"
@@ -25,6 +25,8 @@ module Gitlab
   #   >> gfm(":trollface:")
   #   => "<img alt=\":trollface:\" class=\"emoji\" src=\"/images/trollface.png" title=\":trollface:\" />
   module Markdown
+    include IssuesHelper
+
     attr_reader :html_options
 
     # Public: Parse the provided text with GitLab-Flavored Markdown
@@ -158,13 +160,16 @@ module Gitlab
 
     def reference_user(identifier)
       if member = @project.users_projects.joins(:user).where(users: { username: identifier }).first
-        link_to("@#{identifier}", project_team_member_url(@project, member), html_options.merge(class: "gfm gfm-team_member #{html_options[:class]}")) if member
+        link_to("@#{identifier}", user_path(identifier), html_options.merge(class: "gfm gfm-team_member #{html_options[:class]}")) if member
       end
     end
 
     def reference_issue(identifier)
-      if issue = @project.issues.where(id: identifier).first
-        link_to("##{identifier}", project_issue_url(@project, issue), html_options.merge(title: "Issue: #{issue.title}", class: "gfm gfm-issue #{html_options[:class]}"))
+      if @project.issue_exists? identifier
+        url = url_for_issue(identifier)
+        title = title_for_issue(identifier)
+
+        link_to("##{identifier}", url, html_options.merge(title: "Issue: #{title}", class: "gfm gfm-issue #{html_options[:class]}"))
       end
     end
 

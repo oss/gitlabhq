@@ -24,16 +24,16 @@ module Gitlab
       def clear_and_update!
         raise_no_satellite unless exists?
 
-        delete_heads!
         clear_working_dir!
+        delete_heads!
         update_from_source!
       end
 
       def create
-        output, status = popen("git clone #{project.url_to_repo} #{path}",
+        output, status = popen("git clone #{project.repository.path_to_repo} #{path}",
                                Gitlab.config.satellites.path)
 
-        log("PID: #{project.id}: git clone #{project.url_to_repo} #{path}")
+        log("PID: #{project.id}: git clone #{project.repository.path_to_repo} #{path}")
         log("PID: #{project.id}: -> #{output}")
 
         if status.zero?

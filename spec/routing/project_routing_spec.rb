@@ -56,7 +56,6 @@ end
 #      projects POST   /projects(.:format)     projects#create
 #   new_project GET    /projects/new(.:format) projects#new
 #  wall_project GET    /:id/wall(.:format)     projects#wall
-# graph_project GET    /:id/graph(.:format)    projects#graph
 # files_project GET    /:id/files(.:format)    projects#files
 #  edit_project GET    /:id/edit(.:format)     projects#edit
 #       project GET    /:id(.:format)          projects#show
@@ -72,15 +71,7 @@ describe ProjectsController, "routing" do
   end
 
   it "to #wall" do
-    get("/gitlabhq/wall").should route_to('projects#wall', id: 'gitlabhq')
-  end
-
-  it "to #graph" do
-    get("/gitlabhq/graph/master").should route_to('graph#show', project_id: 'gitlabhq', id: 'master')
-  end
-
-  it "to #files" do
-    get("/gitlabhq/files").should route_to('projects#files', id: 'gitlabhq')
+    get("/gitlabhq/wall").should route_to('walls#show', project_id: 'gitlabhq')
   end
 
   it "to #edit" do
@@ -202,6 +193,7 @@ describe RefsController, "routing" do
   it "to #logs_tree" do
     get("/gitlabhq/refs/stable/logs_tree").should             route_to('refs#logs_tree', project_id: 'gitlabhq', id: 'stable')
     get("/gitlabhq/refs/stable/logs_tree/foo/bar/baz").should route_to('refs#logs_tree', project_id: 'gitlabhq', id: 'stable', path: 'foo/bar/baz')
+    get("/gitlab/gitlabhq/refs/stable/logs_tree/files.scss").should route_to('refs#logs_tree', project_id: 'gitlab/gitlabhq', id: 'stable', path: 'files.scss')
   end
 end
 
@@ -301,6 +293,10 @@ describe CommitsController, "routing" do
     let(:actions)    { [:show] }
     let(:controller) { 'commits' }
   end
+
+  it "to #show" do
+    get("/gitlab/gitlabhq/commits/master.atom").should route_to('commits#show', project_id: 'gitlab/gitlabhq', id: "master", format: "atom")
+  end
 end
 
 #     project_team_members GET    /:project_id/team_members(.:format)          team_members#index
@@ -385,6 +381,7 @@ end
 describe BlameController, "routing" do
   it "to #show" do
     get("/gitlabhq/blame/master/app/models/project.rb").should route_to('blame#show', project_id: 'gitlabhq', id: 'master/app/models/project.rb')
+    get("/gitlab/gitlabhq/blame/master/files.scss").should route_to('blame#show', project_id: 'gitlab/gitlabhq', id: 'master/files.scss')
   end
 end
 
@@ -392,6 +389,8 @@ end
 describe BlobController, "routing" do
   it "to #show" do
     get("/gitlabhq/blob/master/app/models/project.rb").should route_to('blob#show', project_id: 'gitlabhq', id: 'master/app/models/project.rb')
+    get("/gitlabhq/blob/master/app/models/compare.rb").should route_to('blob#show', project_id: 'gitlabhq', id: 'master/app/models/compare.rb')
+    get("/gitlab/gitlabhq/blob/master/files.scss").should route_to('blob#show', project_id: 'gitlab/gitlabhq', id: 'master/files.scss')
   end
 end
 
@@ -399,6 +398,7 @@ end
 describe TreeController, "routing" do
   it "to #show" do
     get("/gitlabhq/tree/master/app/models/project.rb").should route_to('tree#show', project_id: 'gitlabhq', id: 'master/app/models/project.rb')
+    get("/gitlab/gitlabhq/tree/master/files.scss").should route_to('tree#show', project_id: 'gitlab/gitlabhq', id: 'master/files.scss')
   end
 end
 
@@ -417,5 +417,12 @@ describe CompareController, "routing" do
   it "to #show" do
     get("/gitlabhq/compare/master...stable").should     route_to('compare#show', project_id: 'gitlabhq', from: 'master', to: 'stable')
     get("/gitlabhq/compare/issue/1234...stable").should route_to('compare#show', project_id: 'gitlabhq', from: 'issue/1234', to: 'stable')
+  end
+end
+
+describe GraphController, "routing" do
+  it "to #show" do
+    get("/gitlabhq/graph/master").should route_to('graph#show', project_id: 'gitlabhq', id: 'master')
+    get("/gitlabhq/graph/master.json").should route_to('graph#show', project_id: 'gitlabhq', id: 'master', format: "json")
   end
 end

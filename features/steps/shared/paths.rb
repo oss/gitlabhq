@@ -125,6 +125,10 @@ module SharedPaths
     visit project_path(@project)
   end
 
+  Given "I visit my project's settings page" do
+    visit edit_project_path(@project)
+  end
+
   Given "I visit my project's files page" do
     visit project_tree_path(@project, root_ref)
   end
@@ -142,8 +146,8 @@ module SharedPaths
   end
 
   Given "I visit my project's network page" do
-    # Stub Graph::JsonBuilder max_size to speed up test (10 commits vs. 650)
-    Gitlab::Graph::JsonBuilder.stub(max_count: 10)
+    # Stub Graph max_size to speed up test (10 commits vs. 650)
+    Network::Graph.stub(max_count: 10)
 
     visit project_graph_path(@project, root_ref)
   end
@@ -157,11 +161,11 @@ module SharedPaths
   end
 
   Given "I visit my project's wall page" do
-    visit wall_project_path(@project)
+    visit project_wall_path(@project)
   end
 
   Given "I visit my project's wiki page" do
-    visit project_wiki_path(@project, :index)
+    visit project_wiki_path(@project, :home)
   end
 
   When 'I visit project hooks page' do
@@ -173,12 +177,10 @@ module SharedPaths
   # ----------------------------------------
 
   And 'I visit project "Shop" page' do
-    project = Project.find_by_name("Shop")
     visit project_path(project)
   end
 
   When 'I visit edit project "Shop" page' do
-    project = Project.find_by_name("Shop")
     visit edit_project_path(project)
   end
 
@@ -219,7 +221,7 @@ module SharedPaths
   end
 
   And 'I visit project "Shop" issues page' do
-    visit project_issues_path(Project.find_by_name("Shop"))
+    visit project_issues_path(project)
   end
 
   Given 'I visit issue page "Release 0.4"' do
@@ -228,7 +230,7 @@ module SharedPaths
   end
 
   Given 'I visit project "Shop" labels page' do
-    visit project_labels_path(Project.find_by_name("Shop"))
+    visit project_labels_path(project)
   end
 
   Given 'I visit merge request page "Bug NS-04"' do
@@ -242,28 +244,30 @@ module SharedPaths
   end
 
   And 'I visit project "Shop" merge requests page' do
-    visit project_merge_requests_path(Project.find_by_name("Shop"))
+    visit project_merge_requests_path(project)
   end
 
   Given 'I visit project "Shop" milestones page' do
-    @project = Project.find_by_name("Shop")
-    visit project_milestones_path(@project)
+    visit project_milestones_path(project)
   end
 
   Then 'I visit project "Shop" team page' do
-    visit project_team_index_path(Project.find_by_name("Shop"))
+    visit project_team_index_path(project)
   end
 
   Then 'I visit project "Shop" wall page' do
-    project = Project.find_by_name("Shop")
-    visit wall_project_path(project)
+    visit project_wall_path(project)
   end
 
   Given 'I visit project wiki page' do
-    visit project_wiki_path(@project, :index)
+    visit project_wiki_path(@project, :home)
   end
 
   def root_ref
     @project.repository.root_ref
+  end
+
+  def project
+    project = Project.find_by_name!("Shop")
   end
 end

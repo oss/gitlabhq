@@ -25,9 +25,6 @@ class UsersProject < ActiveRecord::Base
 
   attr_accessor :skip_git
 
-  after_save :update_repository, unless: :skip_git?
-  after_destroy :update_repository, unless: :skip_git?
-
   validates :user, presence: true
   validates :user_id, uniqueness: { scope: [:project_id], message: "already exists in project" }
   validates :project_access, inclusion: { in: [GUEST, REPORTER, DEVELOPER, MASTER] }, presence: true
@@ -35,10 +32,10 @@ class UsersProject < ActiveRecord::Base
 
   delegate :name, :username, :email, to: :user, prefix: true
 
-  scope :guests, where(project_access: GUEST)
-  scope :reporters, where(project_access: REPORTER)
-  scope :developers, where(project_access: DEVELOPER)
-  scope :masters, where(project_access: MASTER)
+  scope :guests, -> { where(project_access: GUEST) }
+  scope :reporters, -> { where(project_access: REPORTER) }
+  scope :developers, -> { where(project_access: DEVELOPER) }
+  scope :masters,  -> { where(project_access: MASTER) }
 
   scope :in_project, ->(project) { where(project_id: project.id) }
   scope :in_projects, ->(projects) { where(project_id: project_ids) }
@@ -84,11 +81,6 @@ class UsersProject < ActiveRecord::Base
         end
       end
 
-      GitoliteWorker.perform_async(
-        :update_repositories,
-        project_ids
-      )
-
       true
     rescue
       false
@@ -102,11 +94,6 @@ class UsersProject < ActiveRecord::Base
           users_project.destroy
         end
       end
-
-      GitoliteWorker.perform_async(
-        :update_repositories,
-        project_ids
-      )
 
       true
     rescue
@@ -134,10 +121,6 @@ class UsersProject < ActiveRecord::Base
         "Master"    => MASTER
       }
     end
-  end
-
-  def update_repository
-    project.update_repository
   end
 
   def project_access_human

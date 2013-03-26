@@ -17,7 +17,8 @@ GET /groups
 ]
 ```
 
-## Details of group
+
+## Details of a group
 
 Get all details of a group.
 
@@ -29,17 +30,28 @@ Parameters:
 
 + `id` (required) - The ID of a group
 
+
 ## New group
 
-Create a new project group. Available only for admin
+Creates a new project group. Available only for admin.
 
 ```
 POST /groups
 ```
 
 Parameters:
-+ `name` (required)                  - Email
-+ `path`                             - Password
 
-Will return created group with status `201 Created` on success, or `404 Not found` on fail.
++ `name` (required) - The name of the group
++ `path` (required) - The path of the group
 
+## Transfer project to group
+
+Transfer a project to the Group namespace. Available only for admin
+
+```
+POST  /groups/:id/projects/:project_id
+```
+
+Parameters:
++ `id` (required) - The ID of a group
++ `project_id (required) - The ID of a project

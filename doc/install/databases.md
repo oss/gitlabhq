@@ -12,7 +12,7 @@ GitLab supports the following databases:
     sudo apt-get install -y mysql-server mysql-client libmysqlclient-dev
 
     # Login to MySQL
-    $ mysql -u root -p
+    mysql -u root -p
 
     # Create a user for GitLab. (change $password to a real password)
     mysql> CREATE USER 'gitlab'@'localhost' IDENTIFIED BY '$password';
@@ -27,7 +27,7 @@ GitLab supports the following databases:
     mysql> \q
 
     # Try connecting to the new database with the new user
-    sudo -u gitlab -H mysql -u gitlab -p -D gitlabhq_production
+    sudo -u git -H mysql -u gitlab -p -D gitlabhq_production
 
 ## PostgreSQL
 
@@ -47,5 +47,5 @@ GitLab supports the following databases:
     template1=# \q
 
     # Try connecting to the new database with the new user
-    sudo -u gitlab -H psql -d gitlabhq_production
+    sudo -u git -H psql -d gitlabhq_production
 

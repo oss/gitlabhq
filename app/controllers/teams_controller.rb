@@ -9,13 +9,13 @@ class TeamsController < ApplicationController
   layout 'user_team', except: [:new, :create]
 
   def show
-    user_team
     projects
     @events = Event.in_projects(user_team.project_ids).limit(20).offset(params[:offset] || 0)
   end
 
   def edit
-    user_team
+    projects
+    @avaliable_projects = current_user.admin? ? Project.without_team(user_team) : current_user.owned_projects.without_team(user_team)
   end
 
   def update
@@ -41,6 +41,9 @@ class TeamsController < ApplicationController
     @team.path = @team.name.dup.parameterize if @team.name
 
     if @team.save
+      # Add current user as Master to the team
+      @team.add_members([current_user.id], UsersProject::MASTER, true)
+
       redirect_to team_path(@team)
     else
       render action: :new

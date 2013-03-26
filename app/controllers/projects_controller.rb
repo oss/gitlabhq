@@ -1,5 +1,3 @@
-require Rails.root.join('lib', 'gitlab', 'graph', 'json_builder')
-
 class ProjectsController < ProjectResourceController
   skip_before_filter :project, only: [:new, :create]
   skip_before_filter :repository, only: [:new, :create]
@@ -70,32 +68,10 @@ class ProjectsController < ProjectResourceController
     end
   end
 
-  def files
-    @notes = @project.notes.where("attachment != 'NULL'").order("created_at DESC").limit(100)
-  end
-
-  #
-  # Wall
-  #
-
-  def wall
-    return render_404 unless @project.wall_enabled
-
-    @target_type = :wall
-    @target_id = nil
-    @note = @project.notes.new
-
-    respond_to do |format|
-      format.html
-    end
-  end
-
   def destroy
     return access_denied! unless can?(current_user, :remove_project, project)
 
-    # Delete team first in order to prevent multiple gitolite calls
     project.team.truncate
-
     project.destroy
 
     respond_to do |format|

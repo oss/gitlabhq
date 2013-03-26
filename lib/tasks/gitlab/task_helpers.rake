@@ -38,7 +38,7 @@ namespace :gitlab do
   # Prompt the user to input something
   #
   # message - the message to display before input
-  # choices - array of strings of acceptible answers or nil for any answer
+  # choices - array of strings of acceptable answers or nil for any answer
   #
   # Returns the user's answer
   def prompt(message, choices = nil)
@@ -49,7 +49,7 @@ namespace :gitlab do
     answer
   end
 
-  # Runs the given command and matches the output agains the given pattern
+  # Runs the given command and matches the output against the given pattern
   #
   # Returns nil if nothing matched
   # Retunrs the MatchData if the pattern matched
@@ -77,8 +77,7 @@ namespace :gitlab do
   end
 
   def gid_for(group_name)
-    group_line = File.read("/etc/group").lines.select{|l| l.start_with?("#{group_name}:")}.first
-    group_line.split(":")[2].to_i
+    Etc.getgrnam(group_name).gid
   end
 
   def warn_user_is_not_gitlab

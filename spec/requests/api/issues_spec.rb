@@ -41,6 +41,11 @@ describe Gitlab::API do
       response.status.should == 200
       json_response['title'].should == issue.title
     end
+
+    it "should return 404 if issue id not found" do
+      get api("/projects/#{project.id}/issues/54321", user)
+      response.status.should == 404
+    end
   end
 
   describe "POST /projects/:id/issues" do
@@ -52,16 +57,37 @@ describe Gitlab::API do
       json_response['description'].should be_nil
       json_response['labels'].should == ['label', 'label2']
     end
+
+    it "should return a 400 bad request if title not given" do
+      post api("/projects/#{project.id}/issues", user), labels: 'label, label2'
+      response.status.should == 400
+    end
   end
 
-  describe "PUT /projects/:id/issues/:issue_id" do
+  describe "PUT /projects/:id/issues/:issue_id to update only title" do
     it "should update a project issue" do
       put api("/projects/#{project.id}/issues/#{issue.id}", user),
-        title: 'updated title', labels: 'label2', closed: 1
+        title: 'updated title'
       response.status.should == 200
+
       json_response['title'].should == 'updated title'
+    end
+
+    it "should return 404 error if issue id not found" do
+      put api("/projects/#{project.id}/issues/44444", user),
+        title: 'updated title'
+      response.status.should == 404
+    end
+  end
+
+  describe "PUT /projects/:id/issues/:issue_id to update state and label" do
+    it "should update a project issue" do
+      put api("/projects/#{project.id}/issues/#{issue.id}", user),
+        labels: 'label2', state_event: "close"
+      response.status.should == 200
+
       json_response['labels'].should == ['label2']
-      json_response['closed'].should be_true
+      json_response['state'].should eq "closed"
     end
   end
 

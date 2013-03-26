@@ -11,17 +11,17 @@
       .clearfix
         = f.label :name
         .input
-          = f.text_field :name, required: true
+          = f.text_field :name, required: true, autocomplete: "off"
           %span.help-inline * required
       .clearfix
         = f.label :username
         .input
-          = f.text_field :username, required: true
+          = f.text_field :username, required: true, autocomplete: "off"
           %span.help-inline * required
       .clearfix
         = f.label :email
         .input
-          = f.text_field :email, required: true
+          = f.text_field :email, required: true, autocomplete: "off"
           %span.help-inline * required
 
     %fieldset
@@ -61,7 +61,7 @@
         .span4
           - unless @admin_user.new_record?
             .alert.alert-error
-              - if @admin_user.blocked
+              - if @admin_user.blocked?
                 %p This user is blocked and is not able to login to GitLab
                 = link_to 'Unblock User', unblock_admin_user_path(@admin_user), method: :put, class: "btn btn-small"
               - else
