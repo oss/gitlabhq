@@ -30,7 +30,7 @@ gem 'grit_ext', '~> 0.8.1'
 gem 'gitlab-grack', '~> 1.0.0', require: 'grack'
 
 # LDAP Auth
-gem 'gitlab_omniauth-ldap', '1.0.2', require: "omniauth-ldap"
+gem 'gitlab_omniauth-ldap', '1.0.2', git: 'https://github.com/oss/omniauth-ldap.git', ref: 'f1b472ebfceb0e7d7c125027c98', require: "omniauth-ldap"
 
 # Syntax highlighter
 gem "gitlab-pygments.rb", '~> 0.3.2', require: 'pygments.rb'

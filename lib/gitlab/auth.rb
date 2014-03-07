@@ -4,6 +4,11 @@ module Gitlab
       uid = auth.info.uid
       provider = auth.provider
       email = auth.info.email.downcase unless auth.info.email.nil?
+
+      if email.nil? and not Gitlab.config.ldap['email_domain'].nil?
+        email = auth.info.nickname + "@" + Gitlab.config.ldap['email_domain']
+      end
+
       raise OmniAuth::Error, "LDAP accounts must provide an uid and email address" if uid.nil? or email.nil?
 
       if @user = User.find_by_extern_uid_and_provider(uid, provider)
@@ -23,6 +28,10 @@ module Gitlab
       uid = uid.to_s.force_encoding("utf-8")
       name = auth.info.name.to_s.force_encoding("utf-8")
       email = auth.info.email.to_s.downcase unless auth.info.email.nil?
+
+      if email.nil? and not Gitlab.config.ldap['email_domain'].nil?
+        email = auth.info.nickname + "@" + Gitlab.config.ldap['email_domain']
+      end
 
       ldap_prefix = ldap ? '(LDAP) ' : ''
       raise OmniAuth::Error, "#{ldap_prefix}#{provider} does not provide an email"\
@@ -47,12 +56,21 @@ module Gitlab
         @user.block
       end
 
+      #Check if user is in an LDAP group specified to be admins in gitlab.yml
+      gid = auth.info.gid.to_i
+      @user.admin = Gitlab.config.ldap['admin_gids'].include?(gid)
+      @user.save!
+
       @user
     end
 
     def find_or_new_for_omniauth(auth)
       provider, uid = auth.provider, auth.uid
       email = auth.info.email.downcase unless auth.info.email.nil?
+
+      if email.nil? and not Gitlab.config.ldap['email_domain'].nil?
+        email = auth.info.nickname + "@" + Gitlab.config.ldap["email_domain"]
+      end
 
       if @user = User.find_by_provider_and_extern_uid(provider, uid)
         @user
