@@ -137,6 +137,12 @@ production: &base
     # If you are using "uid: 'userPrincipalName'" on ActiveDirectory you need to
     # disable this setting, because the userPrincipalName contains an '@'.
     allow_username_or_email_login: true
+    # List of LDAP gid numbers to be made admin when user is created
+    # Leave as [] or null to disable
+    # admin_gids: [gid1, gid2]
+    # If not all LDAP users have email entries, default to their username at this domain
+    # Set as null to disable
+    # email_domain: 'example.com'
 
   ## OmniAuth settings
   omniauth:

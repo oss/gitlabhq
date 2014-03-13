@@ -5,6 +5,17 @@ GIT
   specs:
     github-markup (0.7.6)
 
+GIT
+  remote: https://github.com/oss/omniauth-ldap.git
+  revision: 253e2f56600929ff5ad465d3544073f0f5be93cb
+  ref: 253e2f56600929ff5ad465d3544073f0f5be93cb
+  specs:
+    gitlab_omniauth-ldap (1.0.4)
+      net-ldap (~> 0.3.1)
+      omniauth (~> 1.0)
+      pyu-ruby-sasl (~> 0.0.3.1)
+      rubyntlm (~> 0.1.1)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -184,11 +195,6 @@ GEM
       gitlab-linguist (~> 3.0.0)
       rugged (~> 0.19.0)
     gitlab_meta (6.0)
-    gitlab_omniauth-ldap (1.0.4)
-      net-ldap (~> 0.3.1)
-      omniauth (~> 1.0)
-      pyu-ruby-sasl (~> 0.0.3.1)
-      rubyntlm (~> 0.1.1)
     gon (5.0.1)
       actionpack (>= 2.3.0)
       json
@@ -586,7 +592,7 @@ DEPENDENCIES
   gitlab-linguist (~> 3.0.0)
   gitlab_git (~> 5.4.0)
   gitlab_meta (= 6.0)
-  gitlab_omniauth-ldap (= 1.0.4)
+  gitlab_omniauth-ldap (= 1.0.4)!
   gon (~> 5.0.0)
   grape (~> 0.6.1)
   grape-entity (~> 0.3.0)

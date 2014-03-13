@@ -13,6 +13,11 @@ module Gitlab
         def find_or_create(auth)
           @auth = auth
 
+          if email.blank and not ldap_conf['email_domain'].nil?
+            auth.info.email = uid + "@" + ldap_conf['email_domain']
+          end
+
+
           if uid.blank? || email.blank?
             raise_error("Account must provide an uid and email address")
           end
